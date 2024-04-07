@@ -4,7 +4,6 @@ const requestHandler = (req, res) => {
   const { url, method } = req;
 
   if (url === "/") {
-    console.log("/block");
     res.setHeader("Content-Type", "text/html");
     res.write("<html>");
     res.write("<head><title>Enter text</title></head>");
@@ -16,44 +15,22 @@ const requestHandler = (req, res) => {
   }
 
   if (url === "/message" && method === "POST") {
-    console.log("/message block");
     const body = [];
     req.on("data", (chunk) => {
-      console.log("Request 'data' block");
       console.log(chunk);
       body.push(chunk);
-      console.log(`Body: ${body}`);
     });
 
-    return req.on("end", () => {
-      console.log("Request 'end' block");
+    req.on("end", () => {
       const parseBody = Buffer.concat(body).toString();
-      const message = parseBody.split("=").at(1).split("+").join(" ");
-      fs.writeFile("message.txt", message, (err) => {
-        if (err) return res.end(err.message);
+      const message = parseBody.split("=")[1].split("+").join(" ");
+      fs.writeFile("message.txt", message, () => {
         res.statusCode = 302;
         res.setHeader("Location", "/");
         return res.end();
       });
     });
   }
-
-  if (url === "/page") {
-    console.log("/page blcok");
-    res.setHeader("Content-Type", "text/html");
-    res.write("<html>");
-    res.write("<head><title>First Node Html Page</title></head>");
-    res.write("<body><h1>Welcome to my first Node html page</h1></body>");
-    res.write("</html>");
-    return res.end();
-  }
-
-  res.setHeader("Content-Type", "text/html");
-  res.write("<html>");
-  res.write("<head><title>Node server</title></head>");
-  res.write("<body><h1>Welcome to my Nodejs Server</h1></body>");
-  res.write("</html>");
-  return res.end();
 };
 
 // =-=-=-=-=-=-Ways of exporting the functions=-=-=-=-=-=
